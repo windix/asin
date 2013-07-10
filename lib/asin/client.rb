@@ -106,6 +106,8 @@ module ASIN
     DIGEST  = OpenSSL::Digest::Digest.new('sha256')
     PATH    = '/onca/xml'
 
+    attr_reader :url, :resp
+
     # Convenience method to create an ASIN client.
     #
     # An instance is not necessary though, you can simply include the ASIN module otherwise.
@@ -363,18 +365,19 @@ module ASIN
       log(:debug, "calling with params=#{params}")
       signed = create_signed_query_string(params)
 
-      url = "http://#{Configuration.host}#{PATH}?#{signed}"
+      @url = "http://#{Configuration.host}#{PATH}?#{signed}"
       log(:info, "performing rest call to url='#{url}'")
 
-      response = HTTPI.get(url)
+      response = HTTPI.get(@url)
+      @resp = response.body
+
       if response.code == 200
         # force utf-8 chars, works only on 1.9 string
-        resp = response.body
-        resp = resp.force_encoding('UTF-8') if resp.respond_to? :force_encoding
-        log(:debug, "got response='#{resp}'")
-        Crack::XML.parse(resp)
+        @resp = @resp.force_encoding('UTF-8') if @resp.respond_to? :force_encoding
+        log(:debug, "got response='#{@resp}'")
+        Crack::XML.parse(@resp)
       else
-        log(:error, "got response='#{response.body}'")
+        log(:error, "got response='#{@resp}'")
         raise "request failed with response-code='#{response.code}'"
       end
     end
