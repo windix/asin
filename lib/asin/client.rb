@@ -366,7 +366,7 @@ module ASIN
       signed = create_signed_query_string(params)
 
       @url = "http://#{Configuration.host}#{PATH}?#{signed}"
-      log(:info, "performing rest call to url='#{url}'")
+      log(:debug, "performing rest call to url='#{url}'")
 
       response = HTTPI.get(@url)
       @resp = response.body
